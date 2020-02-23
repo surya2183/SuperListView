@@ -13,6 +13,28 @@ import android.widget.*;
 
 import kotlinx.android.synthetic.main.activity_main.*
 
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import retrofit2.*;
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.Retrofit
+
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import com.google.gson.GsonBuilder
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import okhttp3.OkHttpClient
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+
+
+
+
+
+
+
 class MainActivity : AppCompatActivity() {
   val language = arrayOf<String>("C","C++","Java",".Net","Kotlin","Ruby","Rails","Python","Java Script","Php","Ajax","Perl","Hadoop")
   val description = arrayOf<String>(
@@ -49,6 +71,7 @@ class MainActivity : AppCompatActivity() {
     listView.setOnItemClickListener() { adapterView, view, position, id ->
       val itemAtPos = adapterView.getItemAtPosition(position)
       val itemIdAtPos = adapterView.getItemIdAtPosition(position)
+      callService();
       Toast.makeText(
         this,
         "Click on item at $itemAtPos its item id $itemIdAtPos",
@@ -76,6 +99,35 @@ class MainActivity : AppCompatActivity() {
       R.id.action_settings -> true
       else -> super.onOptionsItemSelected(item)
     }
+  }
+
+  fun callService(){
+    val httpclient=OkHttpClient.Builder().build();
+    var gson=GsonBuilder().setLenient().create()
+    val builder = Retrofit.Builder().client(httpclient)
+      .baseUrl(BASE_URL)
+      .addConverterFactory(GsonConverterFactory.create(gson))
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .
+        build()
+    //var retrofit=builder.build();
+    val factsService=builder.create(FactsService::class.java)
+val call=factsService.getCoinData().observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+  .subscribe(this::handleResponse, this::handleError)
+
+
+
+
+  }
+ fun handleResponse(factsService: Facts?) {
+
+    Toast.makeText(this, "hello", Toast.LENGTH_SHORT).show()
+  }
+ fun handleError(error: Throwable) {
+
+   // Log.d(TAG, error.localizedMessage)
+
+    Toast.makeText(this, "hello 123", Toast.LENGTH_SHORT).show()
   }
 
 }
